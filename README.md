@@ -29,6 +29,14 @@ npm run db:seed                  # seeds orgs, users, projects, memberships
 npm run dev                      # http://localhost:3000
 ```
 
+Required environment variables (already set in `.env` for local dev):
+
+```
+DATABASE_URL="file:./dev.db"
+JWT_SECRET="..."                 # any non-empty string for local
+JWT_ACCESS_EXPIRY="1h"
+```
+
 Run tests:
 
 ```bash
@@ -46,16 +54,18 @@ npm run db:reset                 # drops + re-migrates + re-seeds
 
 ## Demo logins
 
-> Populated by `npm run db:seed`. Credentials are intentionally trivial — this is a demo build.
-> _Filled in during Slice 0._
+All accounts share the same password: **`demo1234`**. Run `npm run db:seed` to (re)create them.
 
-| Role            | Email                  | Password    |
-|-----------------|------------------------|-------------|
-| Superadmin      | _tbd_                  | _tbd_       |
-| Org A — Admin   | _tbd_                  | _tbd_       |
-| Org A — Member  | _tbd_                  | _tbd_       |
-| Org B — Admin   | _tbd_                  | _tbd_       |
-| Org B — Member  | _tbd_                  | _tbd_       |
+| Role                          | Email                  | Memberships              |
+|-------------------------------|------------------------|--------------------------|
+| Superadmin                    | `super@demo.test`      | (all projects, all orgs) |
+| Org A — Admin                 | `admin-a@demo.test`    | (all Org A projects)     |
+| Org A — Member (multi)        | `member1-a@demo.test`  | Org A Project 1, 2       |
+| Org A — Member (none)         | `member2-a@demo.test`  | _none — edge case_       |
+| Org B — Admin                 | `admin-b@demo.test`    | (all Org B projects)     |
+| Org B — Member                | `member-b@demo.test`   | Org B Project 1          |
+
+The seed also creates an **Org A — Orphan Project** with no members, to verify Org Admins still see it but Members do not.
 
 ---
 
@@ -140,7 +150,7 @@ Built and shipped one slice at a time. Each slice is end-to-end testable and dem
 
 | # | Slice | Status |
 |---|-------|--------|
-| 0 | Foundations: Prisma schema, seed, decorators, shared domain | _pending_ |
+| 0 | Foundations: Prisma schema, seed, decorators, shared domain | **in review** |
 | 1 | Login (JWT cookie session) | _pending_ |
 | 2 | List projects — role-scoped read | _pending_ |
 | 3 | View project detail — 404 on cross-tenant | _pending_ |
