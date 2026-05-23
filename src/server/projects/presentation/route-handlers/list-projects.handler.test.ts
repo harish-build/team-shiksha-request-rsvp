@@ -27,6 +27,8 @@ describe("list projects route handler", () => {
       findByIds: async () => stubProjects,
       findById: async () => stubProjects[0] ?? null,
       create: async () => stubProjects[0],
+      update: async () => stubProjects[0],
+      delete: async () => {},
     };
     factory = {
       create: () => new ListProjectsUseCase(repository),

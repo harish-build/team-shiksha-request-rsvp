@@ -34,4 +34,16 @@ export class PrismaProjectRepository implements ProjectRepository {
       select: projectSelect,
     });
   }
+
+  async update(id: string, patch: { name: string }): Promise<Project> {
+    return prisma.project.update({
+      where: { id },
+      data: { name: patch.name },
+      select: projectSelect,
+    });
+  }
+
+  async delete(id: string): Promise<void> {
+    await prisma.project.delete({ where: { id } });
+  }
 }

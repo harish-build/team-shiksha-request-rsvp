@@ -6,4 +6,6 @@ export interface ProjectRepository {
   findByIds(ids: string[]): Promise<Project[]>;
   findById(id: string): Promise<Project | null>;
   create(input: { name: string; orgId: string }): Promise<Project>;
+  update(id: string, patch: { name: string }): Promise<Project>;
+  delete(id: string): Promise<void>;
 }

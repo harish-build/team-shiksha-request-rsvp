@@ -27,6 +27,8 @@ describe("get project by id route handler", () => {
       findByIds: async () => [],
       findById: async () => stubProject,
       create: async () => stubProject as Project,
+      update: async () => stubProject as Project,
+      delete: async () => {},
     };
     factory = {
       create: () => new GetProjectByIdUseCase(repository),

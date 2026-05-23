@@ -12,6 +12,8 @@ import type { ProjectsRepository } from "@/features/projects/interfaces/projects
 import { ListProjectsUseCase } from "@/features/projects/application/usecases/list-projects.use-case";
 import { GetProjectByIdUseCase } from "@/features/projects/application/usecases/get-project-by-id.use-case";
 import { CreateProjectUseCase } from "@/features/projects/application/usecases/create-project.use-case";
+import { UpdateProjectUseCase } from "@/features/projects/application/usecases/update-project.use-case";
+import { DeleteProjectUseCase } from "@/features/projects/application/usecases/delete-project.use-case";
 
 export interface AppDependencies {
   httpClient: HttpClient;
@@ -22,6 +24,8 @@ export interface AppDependencies {
   listProjectsUseCase: ListProjectsUseCase;
   getProjectByIdUseCase: GetProjectByIdUseCase;
   createProjectUseCase: CreateProjectUseCase;
+  updateProjectUseCase: UpdateProjectUseCase;
+  deleteProjectUseCase: DeleteProjectUseCase;
 }
 
 const AppDependenciesContext = createContext<AppDependencies | null>(null);
@@ -36,6 +40,8 @@ export function AppDependenciesProvider({ children }: { children: ReactNode }) {
     const listProjectsUseCase = new ListProjectsUseCase(projectsRepository);
     const getProjectByIdUseCase = new GetProjectByIdUseCase(projectsRepository);
     const createProjectUseCase = new CreateProjectUseCase(projectsRepository);
+    const updateProjectUseCase = new UpdateProjectUseCase(projectsRepository);
+    const deleteProjectUseCase = new DeleteProjectUseCase(projectsRepository);
     return {
       httpClient,
       authRepository,
@@ -45,6 +51,8 @@ export function AppDependenciesProvider({ children }: { children: ReactNode }) {
       listProjectsUseCase,
       getProjectByIdUseCase,
       createProjectUseCase,
+      updateProjectUseCase,
+      deleteProjectUseCase,
     };
   }, []);
 

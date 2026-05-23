@@ -5,15 +5,21 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useAppDependencies } from "@/shared/providers/AppDependenciesContext";
 import { useGetProject } from "@/features/projects/hooks/useGetProject";
+import { useUpdateProject } from "@/features/projects/hooks/useUpdateProject";
+import { useDeleteProject } from "@/features/projects/hooks/useDeleteProject";
+import { EditProjectForm } from "@/features/projects/components/EditProjectForm";
+import { DeleteProjectButton } from "@/features/projects/components/DeleteProjectButton";
 import type { Actor } from "@/features/auth/types/actor";
 
 export default function ProjectDetailPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const projectId = typeof params?.id === "string" ? params.id : "";
-  const { getMeUseCase, httpClient } = useAppDependencies();
+  const { getMeUseCase, httpClient, updateProjectUseCase, deleteProjectUseCase } =
+    useAppDependencies();
   const [actor, setActor] = useState<Actor | null>(null);
   const [isResolvingActor, setIsResolvingActor] = useState<boolean>(true);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -38,7 +44,17 @@ export default function ProjectDetailPage() {
     };
   }, [getMeUseCase, router]);
 
-  const { project, isLoading: isLoadingProject, error } = useGetProject(projectId);
+  const { project, isLoading: isLoadingProject, error, refetch } = useGetProject(projectId);
+  const {
+    isLoading: isUpdating,
+    error: updateError,
+    update,
+  } = useUpdateProject({ updateProjectUseCase });
+  const {
+    isLoading: isDeleting,
+    error: deleteError,
+    delete: deleteProject,
+  } = useDeleteProject({ deleteProjectUseCase });
 
   const handleSignOut = async () => {
     try {
@@ -49,6 +65,18 @@ export default function ProjectDetailPage() {
     router.replace("/login");
   };
 
+  const handleUpdate = async (name: string) => {
+    if (!project) return;
+    await update(project.id, name);
+    setIsEditing(false);
+    await refetch();
+  };
+
+  const handleDelete = async (id: string) => {
+    await deleteProject(id);
+    router.push("/projects");
+  };
+
   if (isResolvingActor || !actor) {
     return (
       <main className="flex flex-1 items-center justify-center p-6">
@@ -56,6 +84,8 @@ export default function ProjectDetailPage() {
       </main>
     );
   }
+
+  const canManage = actor.role !== "MEMBER";
 
   return (
     <main className="flex flex-1 flex-col gap-6 p-6 max-w-3xl mx-auto w-full">
@@ -93,9 +123,40 @@ export default function ProjectDetailPage() {
       )}
 
       {!isLoadingProject && !error && project && (
-        <article className="flex flex-col gap-2">
-          <h1 className="text-2xl font-semibold">{project.name}</h1>
-          <span className="text-xs text-gray-500">Organization: {project.orgId}</span>
+        <article className="flex flex-col gap-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col">
+              <h1 className="text-2xl font-semibold">{project.name}</h1>
+              <span className="text-xs text-gray-500">Organization: {project.orgId}</span>
+            </div>
+            {canManage && !isEditing && (
+              <div className="flex gap-2 items-start">
+                <button
+                  type="button"
+                  onClick={() => setIsEditing(true)}
+                  className="border rounded px-3 py-1.5 text-sm hover:bg-gray-100"
+                >
+                  Edit
+                </button>
+                <DeleteProjectButton
+                  projectId={project.id}
+                  isLoading={isDeleting}
+                  error={deleteError}
+                  onDelete={handleDelete}
+                />
+              </div>
+            )}
+          </div>
+
+          {canManage && isEditing && (
+            <EditProjectForm
+              project={project}
+              isLoading={isUpdating}
+              error={updateError}
+              onSubmit={handleUpdate}
+              onCancel={() => setIsEditing(false)}
+            />
+          )}
         </article>
       )}
     </main>

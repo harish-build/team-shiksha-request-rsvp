@@ -1,8 +1,13 @@
 import type { HttpClient } from "@/shared/interfaces/http-client";
 import { HttpError } from "@/shared/services/http-error";
 import { ValidationError } from "@/features/auth/errors/validation.error";
-import type { CreateProjectInput, ProjectsRepository } from "../interfaces/projects.repository";
+import type {
+  CreateProjectInput,
+  ProjectsRepository,
+  UpdateProjectInput,
+} from "../interfaces/projects.repository";
 import { ForbiddenError } from "../errors/forbidden.error";
+import { NotFoundError } from "../errors/not-found.error";
 import type { Project } from "../types/project";
 
 interface ListProjectsResponseBody {
@@ -14,6 +19,10 @@ interface GetProjectResponseBody {
 }
 
 interface CreateProjectResponseBody {
+  project: Project;
+}
+
+interface UpdateProjectResponseBody {
   project: Project;
 }
 
@@ -48,6 +57,37 @@ export class HttpProjectsRepository implements ProjectsRepository {
       if (error instanceof HttpError) {
         if (error.status === 400) throw new ValidationError(error.message);
         if (error.status === 403) throw new ForbiddenError(error.message);
+      }
+      throw error;
+    }
+  }
+
+  async update(id: string, patch: UpdateProjectInput): Promise<Project> {
+    try {
+      const response = await this.httpClient.put<UpdateProjectResponseBody>({
+        path: `/api/projects/${encodeURIComponent(id)}`,
+        body: { name: patch.name },
+      });
+      return response.project;
+    } catch (error) {
+      if (error instanceof HttpError) {
+        if (error.status === 400) throw new ValidationError(error.message);
+        if (error.status === 403) throw new ForbiddenError(error.message);
+        if (error.status === 404) throw new NotFoundError(error.message);
+      }
+      throw error;
+    }
+  }
+
+  async delete(id: string): Promise<void> {
+    try {
+      await this.httpClient.delete<void>({
+        path: `/api/projects/${encodeURIComponent(id)}`,
+      });
+    } catch (error) {
+      if (error instanceof HttpError) {
+        if (error.status === 403) throw new ForbiddenError(error.message);
+        if (error.status === 404) throw new NotFoundError(error.message);
       }
       throw error;
     }

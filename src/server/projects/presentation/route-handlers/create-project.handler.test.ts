@@ -38,6 +38,8 @@ describe("create project route handler", () => {
       findByIds: async () => [],
       findById: async () => null,
       create: createSpy as unknown as ProjectRepository["create"],
+      update: async () => ({ id: "proj-new", name: "", orgId: "" }),
+      delete: async () => {},
     };
     const innerUseCase = new CreateProjectUseCase(repository);
     innerExecuteSpy = jest.spyOn(innerUseCase, "execute");

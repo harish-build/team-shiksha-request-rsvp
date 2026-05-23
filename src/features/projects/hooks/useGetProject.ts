@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAppDependencies } from "@/shared/providers/AppDependenciesContext";
 import type { Project } from "../types/project";
 
@@ -8,6 +8,7 @@ export interface UseGetProjectReturn {
   project: Project | null;
   isLoading: boolean;
   error: string | null;
+  refetch: () => Promise<void>;
 }
 
 export function useGetProject(projectId: string): UseGetProjectReturn {
@@ -15,6 +16,7 @@ export function useGetProject(projectId: string): UseGetProjectReturn {
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [reloadToken, setReloadToken] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -37,7 +39,11 @@ export function useGetProject(projectId: string): UseGetProjectReturn {
     return () => {
       cancelled = true;
     };
-  }, [projectId, getProjectByIdUseCase]);
+  }, [projectId, getProjectByIdUseCase, reloadToken]);
 
-  return { project, isLoading, error };
+  const refetch = useCallback(async () => {
+    setReloadToken((token) => token + 1);
+  }, []);
+
+  return { project, isLoading, error, refetch };
 }
