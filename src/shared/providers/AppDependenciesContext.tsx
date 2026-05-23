@@ -10,6 +10,7 @@ import { GetMeUseCase } from "@/features/auth/application/usecases/get-me.use-ca
 import { HttpProjectsRepository } from "@/features/projects/repositories/http-projects.repository";
 import type { ProjectsRepository } from "@/features/projects/interfaces/projects.repository";
 import { ListProjectsUseCase } from "@/features/projects/application/usecases/list-projects.use-case";
+import { GetProjectByIdUseCase } from "@/features/projects/application/usecases/get-project-by-id.use-case";
 
 export interface AppDependencies {
   httpClient: HttpClient;
@@ -18,6 +19,7 @@ export interface AppDependencies {
   loginUseCase: LoginUseCase;
   getMeUseCase: GetMeUseCase;
   listProjectsUseCase: ListProjectsUseCase;
+  getProjectByIdUseCase: GetProjectByIdUseCase;
 }
 
 const AppDependenciesContext = createContext<AppDependencies | null>(null);
@@ -30,6 +32,7 @@ export function AppDependenciesProvider({ children }: { children: ReactNode }) {
     const loginUseCase = new LoginUseCase(authRepository);
     const getMeUseCase = new GetMeUseCase(authRepository);
     const listProjectsUseCase = new ListProjectsUseCase(projectsRepository);
+    const getProjectByIdUseCase = new GetProjectByIdUseCase(projectsRepository);
     return {
       httpClient,
       authRepository,
@@ -37,6 +40,7 @@ export function AppDependenciesProvider({ children }: { children: ReactNode }) {
       loginUseCase,
       getMeUseCase,
       listProjectsUseCase,
+      getProjectByIdUseCase,
     };
   }, []);
 

@@ -20,4 +20,11 @@ export class PrismaProjectRepository implements ProjectRepository {
       select: projectSelect,
     });
   }
+
+  async findById(id: string): Promise<Project | null> {
+    return prisma.project.findUnique({
+      where: { id },
+      select: projectSelect,
+    });
+  }
 }
