@@ -2,7 +2,7 @@
 
 A challenge submission demonstrating a multi-tenant system with strict data isolation across three role tiers.
 
-> **Status:** scaffold complete. Feature slices implemented incrementally.
+> **Status:** complete.
 
 ---
 
@@ -66,6 +66,8 @@ All accounts share the same password: **`demo1234`**. Run `npm run db:seed` to (
 | Org B — Member                | `member-b@demo.test`   | Org B Project 1          |
 
 The seed also creates an **Org A — Orphan Project** with no members, to verify Org Admins still see it but Members do not.
+
+**Note on memberships:** The problem statement describes *who can view what*, not how memberships are managed. In line with that scope, memberships are seeded; the app intentionally does not expose a UI to add/remove members. To exercise different membership combinations, edit `prisma/seed.ts` and run `npm run db:reset`.
 
 ---
 
@@ -150,13 +152,40 @@ Built and shipped one slice at a time. Each slice is end-to-end testable and dem
 
 | # | Slice | Status |
 |---|-------|--------|
-| 0 | Foundations: Prisma schema, seed, decorators, shared domain | **in review** |
-| 1 | Login (JWT cookie session) | _pending_ |
-| 2 | List projects — role-scoped read | _pending_ |
-| 3 | View project detail — 404 on cross-tenant | _pending_ |
-| 4 | Create project — role-gated, org-scoped | _pending_ |
-| 5 | Edit + delete project | _pending_ |
-| 6 | Manage project memberships | _pending_ |
+| 0 | Foundations: Prisma schema, seed, decorators, shared domain | ✓ |
+| 1 | Login (JWT cookie session) | ✓ |
+| 2 | List projects — role-scoped read | ✓ |
+| 3 | View project detail — 404 on cross-tenant | ✓ |
+| 4 | Create project — role-gated, org-scoped | ✓ |
+| 5 | Edit + delete project | ✓ |
+
+---
+
+## How to verify the isolation rules
+
+Log in as each user (see the table above) and check what they see on `/projects`:
+
+| Login as            | What they should see                          |
+|---------------------|-----------------------------------------------|
+| `super@demo.test`   | All 5 projects across both orgs               |
+| `admin-a@demo.test` | 3 projects (all Org A's, including the orphan) |
+| `member1-a@demo.test` | 2 projects (the ones they're a member of)    |
+| `member2-a@demo.test` | Empty list (no memberships)                  |
+| `admin-b@demo.test` | 2 projects (Org B's)                          |
+| `member-b@demo.test` | 1 project                                     |
+
+To verify the server enforces isolation independently of the UI:
+
+```bash
+# Admin A tries to fetch an Org B project via direct API call → 404
+curl -b cookies.txt http://localhost:3000/api/projects/<org-b-project-id>
+
+# Member tries to create a project → 403 (RoleGuard short-circuits)
+curl -X POST -b cookies.txt -H 'content-type: application/json' \
+  -d '{"name":"x","orgId":"x"}' http://localhost:3000/api/projects
+```
+
+The UI hides actions the actor can't take (no "Create Project" button for Members, no Edit/Delete on the detail page), but the server is the source of truth — every endpoint re-authorizes against the JWT cookie and applies tenant filtering inside the use case.
 
 ---
 
@@ -165,6 +194,6 @@ Built and shipped one slice at a time. Each slice is end-to-end testable and dem
 - TypeScript, Next.js (App Router), React 19
 - SQLite via Prisma
 - JWT (HTTP-only cookie) for sessions
-- Tailwind CSS, shadcn/ui (added per slice as needed)
+- Tailwind CSS
 - Jest + React Testing Library
 - npm
