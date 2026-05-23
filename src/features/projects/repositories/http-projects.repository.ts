@@ -1,6 +1,8 @@
 import type { HttpClient } from "@/shared/interfaces/http-client";
 import { HttpError } from "@/shared/services/http-error";
-import type { ProjectsRepository } from "../interfaces/projects.repository";
+import { ValidationError } from "@/features/auth/errors/validation.error";
+import type { CreateProjectInput, ProjectsRepository } from "../interfaces/projects.repository";
+import { ForbiddenError } from "../errors/forbidden.error";
 import type { Project } from "../types/project";
 
 interface ListProjectsResponseBody {
@@ -8,6 +10,10 @@ interface ListProjectsResponseBody {
 }
 
 interface GetProjectResponseBody {
+  project: Project;
+}
+
+interface CreateProjectResponseBody {
   project: Project;
 }
 
@@ -27,6 +33,22 @@ export class HttpProjectsRepository implements ProjectsRepository {
       return response.project;
     } catch (error) {
       if (error instanceof HttpError && error.status === 404) return null;
+      throw error;
+    }
+  }
+
+  async create(input: CreateProjectInput): Promise<Project> {
+    try {
+      const response = await this.httpClient.post<CreateProjectResponseBody>({
+        path: "/api/projects",
+        body: { name: input.name, orgId: input.orgId },
+      });
+      return response.project;
+    } catch (error) {
+      if (error instanceof HttpError) {
+        if (error.status === 400) throw new ValidationError(error.message);
+        if (error.status === 403) throw new ForbiddenError(error.message);
+      }
       throw error;
     }
   }

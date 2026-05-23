@@ -27,4 +27,11 @@ export class PrismaProjectRepository implements ProjectRepository {
       select: projectSelect,
     });
   }
+
+  async create(input: { name: string; orgId: string }): Promise<Project> {
+    return prisma.project.create({
+      data: { name: input.name, orgId: input.orgId },
+      select: projectSelect,
+    });
+  }
 }

@@ -5,4 +5,5 @@ export interface ProjectRepository {
   findByOrgId(orgId: string): Promise<Project[]>;
   findByIds(ids: string[]): Promise<Project[]>;
   findById(id: string): Promise<Project | null>;
+  create(input: { name: string; orgId: string }): Promise<Project>;
 }

@@ -4,12 +4,15 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDependencies } from "@/shared/providers/AppDependenciesContext";
 import { useListProjects } from "@/features/projects/hooks/useListProjects";
+import { useCreateProject } from "@/features/projects/hooks/useCreateProject";
 import { ProjectList } from "@/features/projects/components/ProjectList";
+import { CreateProjectForm } from "@/features/projects/components/CreateProjectForm";
 import type { Actor } from "@/features/auth/types/actor";
 
 export default function ProjectsPage() {
   const router = useRouter();
-  const { getMeUseCase, listProjectsUseCase, httpClient } = useAppDependencies();
+  const { getMeUseCase, listProjectsUseCase, createProjectUseCase, httpClient } =
+    useAppDependencies();
   const [actor, setActor] = useState<Actor | null>(null);
   const [isResolvingActor, setIsResolvingActor] = useState<boolean>(true);
 
@@ -36,10 +39,21 @@ export default function ProjectsPage() {
     };
   }, [getMeUseCase, router]);
 
-  const { projects, isLoading: isLoadingProjects, error } = useListProjects({
+  const { projects, isLoading: isLoadingProjects, error, refetch } = useListProjects({
     listProjectsUseCase,
     enabled: actor !== null,
   });
+
+  const {
+    isLoading: isCreating,
+    error: createError,
+    create,
+  } = useCreateProject({ createProjectUseCase });
+
+  const handleCreate = async (input: { name: string; orgId: string }) => {
+    await create(input);
+    await refetch();
+  };
 
   const handleSignOut = async () => {
     try {
@@ -73,6 +87,16 @@ export default function ProjectsPage() {
           Sign out
         </button>
       </header>
+
+      {actor.role !== "MEMBER" && (
+        <CreateProjectForm
+          actorRole={actor.role}
+          actorOrgId={actor.orgId}
+          isLoading={isCreating}
+          error={createError}
+          onSubmit={handleCreate}
+        />
+      )}
 
       {error && (
         <p role="alert" className="text-sm text-red-600">

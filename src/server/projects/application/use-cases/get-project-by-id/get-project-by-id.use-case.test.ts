@@ -16,6 +16,7 @@ describe("GetProjectByIdUseCase", () => {
       findByOrgId: jest.fn(),
       findByIds: jest.fn(),
       findById: jest.fn(),
+      create: jest.fn(),
     };
     useCase = new GetProjectByIdUseCase(projectRepository);
   });
