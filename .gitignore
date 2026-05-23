@@ -1,0 +1,50 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# next.js
+/.next/
+/out/
+
+# build output
+/dist/
+/build/
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# generated
+/src/generated/
+
+# testing
+/coverage/
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env
+.env
+.env*.local
+
+# database
+*.db
+*.db-journal
+/prisma/dev.db*
+/prisma/migrations/dev/
+
+# local config
+/.claude/
+/.vscode/
+/.idea/
+
+# planning docs (local-only per challenge submission strategy)
+/docs/
