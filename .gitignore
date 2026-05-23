@@ -16,7 +16,7 @@ node_modules/
 next-env.d.ts
 
 # generated
-/src/generated/
+/generated/
 
 # testing
 /coverage/

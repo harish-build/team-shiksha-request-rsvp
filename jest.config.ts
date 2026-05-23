@@ -9,6 +9,7 @@ const config: Config = {
       testMatch: ["<rootDir>/src/server/**/*.test.ts"],
       moduleNameMapper: {
         "^@/(.*)$": "<rootDir>/src/$1",
+        "^@generated/(.*)$": "<rootDir>/generated/$1",
       },
     },
     {
@@ -22,6 +23,7 @@ const config: Config = {
       ],
       moduleNameMapper: {
         "^@/(.*)$": "<rootDir>/src/$1",
+        "^@generated/(.*)$": "<rootDir>/generated/$1",
       },
       setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
     },
