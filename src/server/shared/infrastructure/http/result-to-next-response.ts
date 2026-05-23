@@ -7,12 +7,22 @@ import {
 } from "../../domain/errors";
 import type { Result } from "../../domain/result";
 
+export interface ResponseOptions {
+  successStatus?: number;
+  setCookie?: { name: string; value: string; maxAgeSeconds: number };
+  clearCookie?: string;
+}
+
 export function resultToNextResponse<T>(
   result: Result<T, Error>,
-  successStatus: number = 200
+  options: ResponseOptions = {}
 ): NextResponse {
   if (result.isSuccess) {
-    return NextResponse.json(result.getValue(), { status: successStatus });
+    const response = NextResponse.json(result.getValue(), {
+      status: options.successStatus ?? 200,
+    });
+    applyCookies(response, options);
+    return response;
   }
 
   const err = result.error();
@@ -23,4 +33,29 @@ export function resultToNextResponse<T>(
   if (err instanceof NotFoundError) return NextResponse.json(body, { status: 404 });
   if (err instanceof ValidationError) return NextResponse.json(body, { status: 400 });
   return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+}
+
+function applyCookies(response: NextResponse, options: ResponseOptions): void {
+  if (options.setCookie) {
+    response.cookies.set({
+      name: options.setCookie.name,
+      value: options.setCookie.value,
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: options.setCookie.maxAgeSeconds,
+    });
+  }
+  if (options.clearCookie) {
+    response.cookies.set({
+      name: options.clearCookie,
+      value: "",
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 0,
+    });
+  }
 }
