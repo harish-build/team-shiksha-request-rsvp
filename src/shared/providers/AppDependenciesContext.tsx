@@ -14,11 +14,15 @@ import { GetProjectByIdUseCase } from "@/features/projects/application/usecases/
 import { CreateProjectUseCase } from "@/features/projects/application/usecases/create-project.use-case";
 import { UpdateProjectUseCase } from "@/features/projects/application/usecases/update-project.use-case";
 import { DeleteProjectUseCase } from "@/features/projects/application/usecases/delete-project.use-case";
+import { HttpOrganizationsRepository } from "@/features/organizations/repositories/http-organizations.repository";
+import type { OrganizationsRepository } from "@/features/organizations/interfaces/organizations.repository";
+import { ListOrganizationsUseCase } from "@/features/organizations/application/usecases/list-organizations.use-case";
 
 export interface AppDependencies {
   httpClient: HttpClient;
   authRepository: AuthRepository;
   projectsRepository: ProjectsRepository;
+  organizationsRepository: OrganizationsRepository;
   loginUseCase: LoginUseCase;
   getMeUseCase: GetMeUseCase;
   listProjectsUseCase: ListProjectsUseCase;
@@ -26,6 +30,7 @@ export interface AppDependencies {
   createProjectUseCase: CreateProjectUseCase;
   updateProjectUseCase: UpdateProjectUseCase;
   deleteProjectUseCase: DeleteProjectUseCase;
+  listOrganizationsUseCase: ListOrganizationsUseCase;
 }
 
 const AppDependenciesContext = createContext<AppDependencies | null>(null);
@@ -35,6 +40,7 @@ export function AppDependenciesProvider({ children }: { children: ReactNode }) {
     const httpClient = new FetchHttpClient();
     const authRepository = new HttpAuthRepository(httpClient);
     const projectsRepository = new HttpProjectsRepository(httpClient);
+    const organizationsRepository = new HttpOrganizationsRepository(httpClient);
     const loginUseCase = new LoginUseCase(authRepository);
     const getMeUseCase = new GetMeUseCase(authRepository);
     const listProjectsUseCase = new ListProjectsUseCase(projectsRepository);
@@ -42,10 +48,12 @@ export function AppDependenciesProvider({ children }: { children: ReactNode }) {
     const createProjectUseCase = new CreateProjectUseCase(projectsRepository);
     const updateProjectUseCase = new UpdateProjectUseCase(projectsRepository);
     const deleteProjectUseCase = new DeleteProjectUseCase(projectsRepository);
+    const listOrganizationsUseCase = new ListOrganizationsUseCase(organizationsRepository);
     return {
       httpClient,
       authRepository,
       projectsRepository,
+      organizationsRepository,
       loginUseCase,
       getMeUseCase,
       listProjectsUseCase,
@@ -53,6 +61,7 @@ export function AppDependenciesProvider({ children }: { children: ReactNode }) {
       createProjectUseCase,
       updateProjectUseCase,
       deleteProjectUseCase,
+      listOrganizationsUseCase,
     };
   }, []);
 

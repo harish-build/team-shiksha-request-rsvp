@@ -7,12 +7,18 @@ import { useListProjects } from "@/features/projects/hooks/useListProjects";
 import { useCreateProject } from "@/features/projects/hooks/useCreateProject";
 import { ProjectList } from "@/features/projects/components/ProjectList";
 import { CreateProjectForm } from "@/features/projects/components/CreateProjectForm";
+import { useOrganizations } from "@/features/organizations/hooks/useOrganizations";
 import type { Actor } from "@/features/auth/types/actor";
 
 export default function ProjectsPage() {
   const router = useRouter();
-  const { getMeUseCase, listProjectsUseCase, createProjectUseCase, httpClient } =
-    useAppDependencies();
+  const {
+    getMeUseCase,
+    listProjectsUseCase,
+    createProjectUseCase,
+    listOrganizationsUseCase,
+    httpClient,
+  } = useAppDependencies();
   const [actor, setActor] = useState<Actor | null>(null);
   const [isResolvingActor, setIsResolvingActor] = useState<boolean>(true);
 
@@ -49,6 +55,15 @@ export default function ProjectsPage() {
     error: createError,
     create,
   } = useCreateProject({ createProjectUseCase });
+
+  const {
+    organizations,
+    isLoading: isLoadingOrganizations,
+    error: organizationsError,
+  } = useOrganizations({
+    listOrganizationsUseCase,
+    enabled: actor?.role === "SUPERADMIN",
+  });
 
   const handleCreate = async (input: { name: string; orgId: string }) => {
     await create(input);
@@ -93,8 +108,10 @@ export default function ProjectsPage() {
           actorRole={actor.role}
           actorOrgId={actor.orgId}
           isLoading={isCreating}
-          error={createError}
+          error={createError ?? organizationsError}
           onSubmit={handleCreate}
+          organizations={organizations}
+          isLoadingOrgs={isLoadingOrganizations}
         />
       )}
 

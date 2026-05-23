@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Project } from "../types/project";
 
 export interface ProjectListProps {
@@ -16,11 +17,13 @@ export function ProjectList({ projects }: ProjectListProps) {
   return (
     <ul className="flex flex-col gap-2 w-full max-w-md">
       {projects.map((project) => (
-        <li
-          key={project.id}
-          className="border rounded px-4 py-3 flex flex-col gap-1"
-        >
-          <span className="font-medium">{project.name}</span>
+        <li key={project.id}>
+          <Link
+            href={`/projects/${project.id}`}
+            className="block border rounded px-4 py-3 hover:bg-gray-50 transition-colors"
+          >
+            <span className="font-medium">{project.name}</span>
+          </Link>
         </li>
       ))}
     </ul>

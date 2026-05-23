@@ -35,6 +35,17 @@ describe("Component Test: ProjectList", () => {
     page.shouldShowProjectNamed("Gamma");
   });
 
+  it("links each row to the project detail page", () => {
+    const projects: Project[] = [{ id: "p1", name: "Alpha", orgId: "org-a" }];
+
+    renderComponent(projects);
+
+    expect(screen.getByRole("link", { name: /alpha/i })).toHaveAttribute(
+      "href",
+      "/projects/p1"
+    );
+  });
+
   it("shows an empty state when there are no projects", () => {
     const { page } = renderComponent([]);
 
