@@ -1,19 +1,11 @@
 "use client";
 
-import { useMemo } from "react";
-import { FetchHttpClient } from "@/shared/services/fetch-http.client";
-import { HttpAuthRepository } from "@/features/auth/repositories/http-auth.repository";
-import { LoginUseCase } from "@/features/auth/application/usecases/login.use-case";
 import { useLogin } from "@/features/auth/hooks/useLogin";
 import { LoginForm } from "@/features/auth/components/LoginForm";
+import { useAppDependencies } from "@/shared/providers/AppDependenciesContext";
 
 export default function LoginPage() {
-  const loginUseCase = useMemo(() => {
-    const httpClient = new FetchHttpClient();
-    const authRepository = new HttpAuthRepository(httpClient);
-    return new LoginUseCase(authRepository);
-  }, []);
-
+  const { loginUseCase } = useAppDependencies();
   const { login, isLoading, error } = useLogin({ loginUseCase });
 
   return (

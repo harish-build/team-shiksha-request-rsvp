@@ -7,4 +7,5 @@ export interface LoginCredentials {
 
 export interface AuthRepository {
   login(credentials: LoginCredentials): Promise<Actor>;
+  getMe(): Promise<Actor | null>;
 }

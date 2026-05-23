@@ -9,6 +9,10 @@ interface LoginResponseBody {
   actor: Actor;
 }
 
+interface MeResponseBody {
+  actor: Actor;
+}
+
 export class HttpAuthRepository implements AuthRepository {
   constructor(private readonly httpClient: HttpClient) {}
 
@@ -24,6 +28,16 @@ export class HttpAuthRepository implements AuthRepository {
         if (error.status === 401) throw new InvalidCredentialsError();
         if (error.status === 400) throw new ValidationError(error.message);
       }
+      throw error;
+    }
+  }
+
+  async getMe(): Promise<Actor | null> {
+    try {
+      const response = await this.httpClient.get<MeResponseBody>({ path: "/api/auth/me" });
+      return response.actor;
+    } catch (error) {
+      if (error instanceof HttpError && error.status === 401) return null;
       throw error;
     }
   }
